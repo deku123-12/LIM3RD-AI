@@ -119,6 +119,7 @@ header{height:62px;background:var(--panel);border-bottom:1px solid var(--border)
 </div>
 
 <script>
+// @ts-nocheck
 let chats=[];
 try{chats=JSON.parse(localStorage.getItem("lim3rd_chats")||"[]");if(!Array.isArray(chats))chats=[];}catch(e){chats=[];}
 let currentChat=null;
