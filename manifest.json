@@ -1,0 +1,16 @@
+{
+  "name": "LIM3RD AI",
+  "short_name": "LIM3RD AI",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090711",
+  "theme_color": "#090711",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2593/2593627.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
