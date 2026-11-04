@@ -5,207 +5,789 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#090711">
 <title>LIM3RD AI</title>
+
 <style>
-:root{--bg:#090711;--panel:#110c20;--panel2:#1b1429;--purple:#9333ea;--light:#d8b4fe;--muted:#a49ab5;--border:#38205c}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:white;font-family:Arial,sans-serif;height:100vh;height:100dvh;display:flex;overflow:hidden}
-.sidebar{width:270px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:15px;flex-shrink:0;transition:transform .25s}
-.brand{color:var(--light);font-size:21px;font-weight:bold;letter-spacing:2px;padding:12px 5px 25px}
-.new-chat{background:#251439;border:1px solid #7040a0;color:white;padding:13px;border-radius:10px;text-align:left;cursor:pointer}
-.section-title{color:var(--muted);font-size:11px;margin:25px 5px 12px;letter-spacing:1px}
-.history{flex:1;overflow-y:auto}
-.history-item{display:flex;align-items:center;gap:5px;padding:10px;border-radius:8px;margin-bottom:5px;cursor:pointer;color:#d5c9e5;font-size:13px}
-.history-item.active,.history-item:hover{background:#29183e}
-.history-title{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.delete-chat{background:transparent;border:none;color:#aa91bd;padding:5px;cursor:pointer}
-.profile{display:flex;align-items:center;gap:10px;padding:12px 5px 5px;border-top:1px solid var(--border);cursor:pointer}
-.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#9333ea,#312e81);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.profile-name{font-size:13px;font-weight:bold}.profile-label{font-size:10px;color:var(--muted);margin-top:4px}
-.main{flex:1;min-width:0;display:flex;flex-direction:column}
-header{height:62px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 15px}
-.header-left{display:flex;align-items:center;gap:12px}
-.menu-btn{background:none;border:none;color:white;font-size:24px;cursor:pointer}
-.header-title{color:var(--light);font-size:16px;font-weight:bold}
-.mode{background:#24143b;border:1px solid #7844a8;color:var(--light);padding:8px;border-radius:8px;font-size:11px}
-.chat{flex:1;overflow-y:auto;padding:20px;scroll-behavior:smooth}
-.welcome{text-align:center;padding:50px 10px;margin:auto}
-.orb{width:85px;height:85px;border-radius:50%;margin:0 auto 20px;background:linear-gradient(135deg,#9333ea,#312e81);box-shadow:0 0 35px #9333ea;display:flex;align-items:center;justify-content:center;font-size:35px}
-.welcome h2{color:var(--light);margin-bottom:12px}.welcome p{color:var(--muted);font-size:13px;line-height:1.7}
-.message-row{display:flex;gap:10px;margin-bottom:22px;align-items:flex-start}.user-row{flex-direction:row-reverse}
-.message-avatar{width:34px;height:34px;border-radius:50%;background:#392054;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
-.message-avatar img{width:100%;height:100%;object-fit:cover}
-.message-content{max-width:85%;padding:12px 14px;background:#1b1429;border:1px solid #493064;border-radius:12px;font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
-.user-row .message-content{background:#52228b;border-color:#7844a8}
-.input-section{padding:12px 15px 15px;background:var(--panel);border-top:1px solid var(--border)}
-.input-box{display:flex;gap:8px;background:var(--panel2);border:1px solid #57377c;border-radius:13px;padding:7px}
-.input-box input{flex:1;min-width:0;background:transparent;color:white;border:none;outline:none;padding:10px;font-size:14px}
-.send-btn{background:var(--purple);border:none;color:white;border-radius:9px;padding:0 16px;font-size:18px;cursor:pointer}
-.disclaimer{color:#716582;font-size:10px;text-align:center;margin-top:9px}
-.overlay{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:20;padding:15px}
-.overlay.show{display:flex}
-.modal{width:100%;max-width:390px;max-height:85vh;overflow-y:auto;background:#171024;border:1px solid #7040a0;border-radius:16px;padding:20px}
-.modal h2{color:var(--light);margin-bottom:20px}
-.modal label{display:block;font-size:12px;color:var(--muted);margin:15px 0 7px}
-.modal input,.modal select,.modal textarea{width:100%;padding:12px;background:#241a32;color:white;border:1px solid #57377c;border-radius:8px;outline:none}
-.modal textarea{min-height:80px;resize:vertical}
-.modal-btns{display:flex;gap:8px;margin-top:20px}
-.action-btn{flex:1;padding:12px;border-radius:8px;border:none;background:var(--purple);color:white;cursor:pointer}
-.secondary{background:#382b49}.danger{background:#8b2635}
-.avatar-preview{width:65px;height:65px;margin:10px auto;border-radius:50%;overflow:hidden;background:#392054;display:flex;justify-content:center;align-items:center;font-size:25px}
-.avatar-preview img{width:100%;height:100%;object-fit:cover}
-.dialog-box{width:100%;max-width:350px;background:#171024;border:1px solid #8b4ac2;border-radius:16px;padding:22px;box-shadow:0 15px 50px #0009;animation:pop .16s ease-out}
-.dialog-icon{width:45px;height:45px;border-radius:50%;background:#342047;color:var(--light);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px}
-.dialog-box h3{color:var(--light);font-size:18px;margin-bottom:9px}
-.dialog-box p{color:#c4b8d2;font-size:13px;line-height:1.6;white-space:pre-wrap}
-.dialog-actions{display:flex;gap:9px;margin-top:22px}
-.dialog-actions button{flex:1;padding:11px;border:0;border-radius:8px;color:white;cursor:pointer;font-weight:bold}
-.dialog-cancel{background:#382b49}.dialog-confirm{background:var(--purple)}.dialog-confirm.danger{background:#9b293d}
-@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
-@media(max-width:600px){.sidebar{position:fixed;z-index:10;top:0;bottom:0;left:0;transform:translateX(-100%);box-shadow:10px 0 30px #0008}.sidebar.open{transform:translateX(0)}.main{width:100%}.chat{padding:15px}}
+:root {
+    --bg:#090711;
+    --panel:#110c20;
+    --panel2:#1b1429;
+    --purple:#9333ea;
+    --light:#d8b4fe;
+    --muted:#a49ab5;
+    --border:#38205c;
+}
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body {
+    background:var(--bg);
+    color:white;
+    font-family:Arial,sans-serif;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    overflow:hidden;
+}
+
+/* SIDEBAR & ANIMATIONS */
+.sidebar {
+    width:270px;
+    background:var(--panel);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding:15px;
+    flex-shrink:0;
+    transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand {
+    color:var(--light);
+    font-size:21px;
+    font-weight:bold;
+    letter-spacing:2px;
+    padding:12px 5px 25px;
+}
+
+.new-chat {
+    background:#251439;
+    border:1px solid #7040a0;
+    color:white;
+    padding:13px;
+    border-radius:10px;
+    text-align:left;
+    cursor:pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.new-chat:active {
+    transform: scale(0.98);
+}
+
+.section-title {
+    color:var(--muted);
+    font-size:11px;
+    margin:25px 5px 12px;
+    letter-spacing:1px;
+}
+
+.history {
+    flex:1;
+    overflow-y:auto;
+}
+
+.history-item {
+    display:flex;
+    align-items:center;
+    gap:5px;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:5px;
+    cursor:pointer;
+    color:#d5c9e5;
+    font-size:13px;
+    transition: background 0.2s;
+}
+
+.history-item.active,
+.history-item:hover {
+    background:#29183e;
+}
+
+.history-title {
+    flex:1;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.delete-chat {
+    background:transparent;
+    border:none;
+    color:#aa91bd;
+    padding:5px;
+    cursor:pointer;
+    transition: color 0.2s;
+}
+
+.delete-chat:hover {
+    color: #fca5a5;
+}
+
+.clear-all-btn {
+    background: #381a24;
+    border: 1px solid #8b2635;
+    color: #fca5a5;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+}
+
+.clear-all-btn:hover {
+    background: #4c2230;
+}
+
+.profile {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 5px 5px;
+    border-top:1px solid var(--border);
+    cursor:pointer;
+}
+
+.avatar {
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#9333ea,#312e81);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    flex-shrink:0;
+}
+
+.avatar img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.profile-name {
+    font-size:13px;
+    font-weight:bold;
+}
+
+.profile-label {
+    font-size:10px;
+    color:var(--muted);
+    margin-top:4px;
+}
+
+/* MAIN */
+.main {
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+}
+
+header {
+    height:62px;
+    background:var(--panel);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 15px;
+}
+
+.header-left {
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.menu-btn {
+    background:none;
+    border:none;
+    color:white;
+    font-size:24px;
+    cursor:pointer;
+}
+
+.header-title {
+    color:var(--light);
+    font-size:16px;
+    font-weight:bold;
+}
+
+.mode {
+    background:#24143b;
+    border:1px solid #7844a8;
+    color:var(--light);
+    padding:8px;
+    border-radius:8px;
+    font-size:11px;
+}
+
+/* CHAT & MESSAGE ANIMATIONS */
+.chat {
+    flex:1;
+    overflow-y:auto;
+    padding:20px;
+    scroll-behavior:smooth;
+}
+
+.welcome {
+    text-align:center;
+    padding:50px 10px;
+    margin:auto;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.orb {
+    width:85px;
+    height:85px;
+    border-radius:50%;
+    margin:0 auto 20px;
+    background:linear-gradient(135deg,#9333ea,#312e81);
+    box-shadow:0 0 35px #9333ea;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:35px;
+    animation: pulseOrb 3s infinite alternate ease-in-out;
+}
+
+@keyframes pulseOrb {
+    0% { transform: scale(1); box-shadow: 0 0 25px #9333ea; }
+    100% { transform: scale(1.06); box-shadow: 0 0 45px #b056ff; }
+}
+
+.welcome h2 {
+    color:var(--light);
+    margin-bottom:12px;
+}
+
+.welcome p {
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.7;
+}
+
+/* MESSAGE SLIDE IN ANIMATION */
+.message-row {
+    display:flex;
+    gap:10px;
+    margin-bottom:22px;
+    align-items:flex-start;
+    animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-row {
+    flex-direction:row-reverse;
+}
+
+.message-avatar {
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:#392054;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    flex-shrink:0;
+}
+
+.message-avatar img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.message-content {
+    max-width:85%;
+    padding:12px 14px;
+    background:#1b1429;
+    border:1px solid #493064;
+    border-radius:12px;
+    font-size:14px;
+    line-height:1.6;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+}
+
+.user-row .message-content {
+    background:#52228b;
+    border-color:#7844a8;
+}
+
+/* TYPING CURSOR ANIMATION */
+.typing-cursor::after {
+    content: '▋';
+    display: inline-block;
+    margin-left: 2px;
+    color: var(--light);
+    animation: blinkCursor 0.7s infinite;
+}
+
+@keyframes blinkCursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* INPUT */
+.input-section {
+    padding:12px 15px 15px;
+    background:var(--panel);
+    border-top:1px solid var(--border);
+}
+
+.input-box {
+    display:flex;
+    gap:8px;
+    background:var(--panel2);
+    border:1px solid #57377c;
+    border-radius:13px;
+    padding:7px;
+    transition: border-color 0.2s;
+}
+
+.input-box:focus-within {
+    border-color: var(--purple);
+}
+
+.input-box input {
+    flex:1;
+    min-width:0;
+    background:transparent;
+    color:white;
+    border:none;
+    outline:none;
+    padding:10px;
+    font-size:14px;
+}
+
+.send-btn {
+    background:var(--purple);
+    border:none;
+    color:white;
+    border-radius:9px;
+    padding:0 16px;
+    font-size:18px;
+    cursor:pointer;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.send-btn:active {
+    transform: scale(0.92);
+}
+
+.disclaimer {
+    color:#716582;
+    font-size:10px;
+    text-align:center;
+    margin-top:9px;
+}
+
+/* MODALS WITH FADE ANIMATION */
+.overlay {
+    position:fixed;
+    inset:0;
+    background:#000a;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+    padding:15px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.overlay.show {
+    display:flex;
+    opacity: 1;
+}
+
+.modal {
+    width:100%;
+    max-width:390px;
+    max-height:85vh;
+    overflow-y:auto;
+    background:#171024;
+    border:1px solid #7040a0;
+    border-radius:16px;
+    padding:20px;
+    transform: scale(0.9);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overlay.show .modal {
+    transform: scale(1);
+}
+
+.modal h2 {
+    color:var(--light);
+    margin-bottom:15px;
+    font-size: 18px;
+}
+
+.modal p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.modal label {
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin:15px 0 7px;
+}
+
+.modal input,
+.modal select,
+.modal textarea {
+    width:100%;
+    padding:12px;
+    background:#241a32;
+    color:white;
+    border:1px solid #57377c;
+    border-radius:8px;
+    outline:none;
+}
+
+.modal textarea {
+    min-height:80px;
+    resize:vertical;
+}
+
+.modal-btns {
+    display:flex;
+    gap:8px;
+    margin-top:20px;
+}
+
+.action-btn {
+    flex:1;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    background:var(--purple);
+    color:white;
+    cursor:pointer;
+    font-weight: bold;
+}
+
+.secondary {
+    background:#382b49;
+}
+
+.danger-btn {
+    background: #8b2635;
+}
+
+.avatar-preview {
+    width:65px;
+    height:65px;
+    margin:10px auto;
+    border-radius:50%;
+    overflow:hidden;
+    background:#392054;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:25px;
+}
+
+.avatar-preview img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* MOBILE */
+@media(max-width:600px) {
+    .sidebar {
+        position:fixed;
+        z-index:10;
+        top:0;
+        bottom:0;
+        left:0;
+        transform:translateX(-100%);
+        box-shadow:10px 0 30px #0008;
+    }
+    .sidebar.open {
+        transform:translateX(0);
+    }
+    .main {
+        width:100%;
+    }
+    .chat {
+        padding:15px;
+    }
+}
 </style>
 </head>
+
 <body>
+
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <div class="brand">✦ LIM3RD AI</div>
-  <button class="new-chat" onclick="newChat()">＋ New Chat</button>
-  <div class="section-title">RECENT CONVERSATIONS</div>
-  <div class="history" id="history"></div>
-  <div class="profile" onclick="openSettings()">
-    <div class="avatar" id="sideAvatar">✦</div>
-    <div><div class="profile-name">LIM3RD AI</div><div class="profile-label">AI Assistant · Settings</div></div>
-  </div>
+    <div class="brand">✦ LIM3RD AI</div>
+    <button class="new-chat" onclick="newChat()">＋ New Chat</button>
+    <div class="section-title">RECENT CONVERSATIONS</div>
+    <div class="history" id="history"></div>
+    <button class="clear-all-btn" onclick="confirmClearAll()">🗑️ Clear All Conversations</button>
+    <div class="profile" onclick="openSettings()">
+        <div class="avatar" id="sideAvatar">✦</div>
+        <div>
+            <div class="profile-name" id="sideProfileName">LIM3RD AI</div>
+            <div class="profile-label">AI Assistant · Settings</div>
+        </div>
+    </div>
 </aside>
+
+<!-- MAIN -->
 <div class="main">
 <header>
-  <div class="header-left"><button class="menu-btn" onclick="toggleSidebar()">☰</button><div class="header-title">LIM3RD AI</div></div>
-  <select class="mode" id="mode"><option value="online">ONLINE</option><option value="offline">OFFLINE</option></select>
+    <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="header-title" id="headerTitle">LIM3RD AI</div>
+    </div>
+    <select class="mode" id="mode">
+        <option value="offline">OFFLINE ENGINE</option>
+        <option value="online">ONLINE API</option>
+    </select>
 </header>
+
 <main class="chat" id="chat">
-  <div class="welcome"><div class="orb">✦</div><h2>How can I help you today?</h2><p>Welcome to LIM3RD AI.<br>Your personal intelligence platform.</p></div>
+    <div class="welcome">
+        <div class="orb">✦</div>
+        <h2>How can I help you today?</h2>
+        <p>Welcome to LIM3RD AI.<br>Your personal intelligence platform.</p>
+    </div>
 </main>
+
 <footer class="input-section">
-  <div class="input-box"><input id="message" type="text" placeholder="Message LIM3RD AI..." autocomplete="off"><button class="send-btn" id="sendBtn">➤</button></div>
-  <div class="disclaimer">LIM3RD AI · Version 0.3</div>
+    <div class="input-box">
+        <input id="message" type="text" placeholder="Message LIM3RD AI..." autocomplete="off">
+        <button class="send-btn" id="sendBtn">➤</button>
+    </div>
+    <div class="disclaimer">LIM3RD AI · Version 0.5 (Animated Edition)</div>
 </footer>
 </div>
 
 <!-- SETTINGS MODAL -->
 <div class="overlay" id="settingsOverlay">
-  <div class="modal">
+<div class="modal">
     <h2>⚙ LIM3RD AI Settings</h2>
     <div class="avatar-preview" id="avatarPreview">✦</div>
-    <label>AI Display Name</label><input id="aiName" value="LIM3RD AI">
-    <label>Choose Profile Picture</label><input type="file" id="avatarInput" accept="image/*">
+    
+    <label>AI Display Name (Locked)</label>
+    <input id="aiName" value="LIM3RD AI" disabled style="opacity: 0.5; cursor: not-allowed;">
+
+    <label>Choose Profile Picture</label>
+    <input type="file" id="avatarInput" accept="image/*">
     <button class="action-btn secondary" style="width:100%;margin-top:8px" onclick="removeAvatar()">Remove Avatar</button>
+
     <label>AI Personality</label>
-    <select id="personality"><option>Friendly</option><option>Professional</option><option>Creative</option><option>Casual</option></select>
+    <select id="personality">
+        <option value="Friendly">Friendly</option>
+        <option value="Professional">Professional</option>
+        <option value="Creative">Creative</option>
+        <option value="Casual">Casual</option>
+    </select>
+
     <label>Preferred Language</label>
-    <select id="language"><option>Automatic</option><option>English</option><option>Filipino</option><option>Chinese</option></select>
-    <label>Custom Instructions</label><textarea id="instructions" placeholder="Customize LIM3RD AI behavior..."></textarea>
-    <div class="modal-btns"><button class="action-btn secondary" onclick="closeSettings()">Cancel</button><button class="action-btn" onclick="saveSettings()">Save Changes</button></div>
-    <button class="action-btn danger" style="width:100%;margin-top:10px" onclick="clearAllHistory()">Clear All Conversations</button>
-  </div>
+    <select id="language">
+        <option value="Automatic">Automatic (Auto-Detect)</option>
+        <option value="English">English</option>
+        <option value="Filipino">Filipino</option>
+    </select>
+
+    <label>Custom Instructions</label>
+    <textarea id="instructions" placeholder="Customize LIM3RD AI behavior..."></textarea>
+
+    <div class="modal-btns">
+        <button class="action-btn secondary" onclick="closeSettings()">Cancel</button>
+        <button class="action-btn" onclick="saveSettings()">Save Changes</button>
+    </div>
+</div>
 </div>
 
-<!-- BRANDED CONFIRMATION / NOTICE DIALOG -->
-<div class="overlay" id="dialogOverlay" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
-  <div class="dialog-box">
-    <div class="dialog-icon" id="dialogIcon">✦</div>
-    <h3 id="dialogTitle">LIM3RD AI</h3>
-    <p id="dialogMessage"></p>
-    <div class="dialog-actions" id="dialogActions"></div>
-  </div>
+<!-- CUSTOM CONFIRMATION MODAL -->
+<div class="overlay" id="customConfirmOverlay">
+<div class="modal" style="max-width:320px; text-align:center;">
+    <h2>Confirm Action</h2>
+    <p id="confirmMessage">Are you sure you want to delete this conversation?</p>
+    <div class="modal-btns">
+        <button class="action-btn secondary" onclick="closeConfirmModal(false)">Cancel</button>
+        <button class="action-btn danger-btn" onclick="closeConfirmModal(true)">Delete</button>
+    </div>
+</div>
 </div>
 
 <script>
-// @ts-nocheck
-let chats=[];
-try{chats=JSON.parse(localStorage.getItem("lim3rd_chats")||"[]");if(!Array.isArray(chats))chats=[];}catch(e){chats=[];}
-let currentChat=null;
-let settings={};
-try{settings=JSON.parse(localStorage.getItem("lim3rd_settings")||"{}");}catch(e){settings={};}
-let avatarData=localStorage.getItem("lim3rd_avatar")||"";
+let chats = [];
+try {
+    chats = JSON.parse(localStorage.getItem("lim3rd_chats") || "[]");
+    if (!Array.isArray(chats)) chats = [];
+} catch(e) { chats = []; }
 
-function showDialog({title="LIM3RD AI",message="",confirmText="OK",cancelText="",danger=false,icon="✦"}={}){
-  return new Promise(resolve=>{
-    const overlay=document.getElementById("dialogOverlay");
-    const actions=document.getElementById("dialogActions");
-    document.getElementById("dialogTitle").textContent=title;
-    document.getElementById("dialogMessage").textContent=message;
-    document.getElementById("dialogIcon").textContent=icon;
-    actions.innerHTML="";
-    if(cancelText){
-      const cancel=document.createElement("button");
-      cancel.className="dialog-cancel";cancel.textContent=cancelText;
-      cancel.onclick=()=>finish(false);actions.appendChild(cancel);
+let currentChat = null;
+let settings = {};
+try {
+    settings = JSON.parse(localStorage.getItem("lim3rd_settings") || "{}");
+} catch(e) { settings = {}; }
+
+let avatarData = localStorage.getItem("lim3rd_avatar") || "";
+let confirmCallback = null;
+
+function saveChats() {
+    try {
+        localStorage.setItem("lim3rd_chats", JSON.stringify(chats));
+        return true;
+    } catch(e) {
+        alert("Storage full.");
+        return false;
     }
-    const confirm=document.createElement("button");
-    confirm.className="dialog-confirm"+(danger?" danger":"");
-    confirm.textContent=confirmText;
-    confirm.onclick=()=>finish(true);
-    actions.appendChild(confirm);
-    function finish(value){overlay.classList.remove("show");document.removeEventListener("keydown",onKey);resolve(value);}
-    function onKey(event){if(event.key==="Escape"&&cancelText)finish(false);if(event.key==="Enter")finish(true);}
-    overlay.onclick=event=>{if(event.target===overlay&&cancelText)finish(false);};
-    document.addEventListener("keydown",onKey);
-    overlay.classList.add("show");
-    confirm.focus();
-  });
 }
-function showNotice(message,title="LIM3RD AI"){return showDialog({title,message,confirmText:"Got it",icon:"✦"});}
-function confirmAction(message,title="Confirm Action",confirmText="Continue"){return showDialog({title,message,confirmText,cancelText:"Cancel",danger:true,icon:"!"});}
 
-function saveChats(){
-  try{localStorage.setItem("lim3rd_chats",JSON.stringify(chats));return true;}
-  catch(e){showNotice("Your browser storage is full. Delete old conversations or use a smaller profile picture.");return false;}
+function saveSettingsData() {
+    localStorage.setItem("lim3rd_settings", JSON.stringify(settings));
 }
-function saveSettingsData(){try{localStorage.setItem("lim3rd_settings",JSON.stringify(settings));return true;}catch(e){showNotice("Unable to save settings in this browser.");return false;}}
-function toggleSidebar(){
-  const sidebar=document.getElementById("sidebar");
-  if(window.innerWidth<=600)sidebar.classList.toggle("open");
-  else{sidebar.classList.toggle("desktop-hidden");sidebar.style.display=sidebar.classList.contains("desktop-hidden")?"none":"flex";}
+
+// Custom Modal Confirm Handler
+function showCustomConfirm(msg, callback) {
+    document.getElementById("confirmMessage").textContent = msg;
+    document.getElementById("customConfirmOverlay").classList.add("show");
+    confirmCallback = callback;
 }
-function closeSidebar(){if(window.innerWidth<=600)document.getElementById("sidebar").classList.remove("open");}
-function newChat(){currentChat=null;renderChat();renderHistory();closeSidebar();document.getElementById("message").focus();}
-function selectChat(id){
-  currentChat=chats.find(chat=>chat.id===id)||null;if(!currentChat)return;
-  renderChat();renderHistory();closeSidebar();document.getElementById("chat").scrollTop=0;
+
+function closeConfirmModal(result) {
+    document.getElementById("customConfirmOverlay").classList.remove("show");
+    if (confirmCallback) {
+        confirmCallback(result);
+        confirmCallback = null;
+    }
 }
-async function deleteChat(id,event){
-  if(event)event.stopPropagation();
-  const chat=chats.find(item=>item.id===id);if(!chat)return;
-  const ok=await confirmAction("This conversation will be permanently deleted. This action cannot be undone.","Delete Conversation","Delete");
-  if(!ok)return;
-  chats=chats.filter(chat=>chat.id!==id);
-  if(currentChat&&currentChat.id===id)currentChat=null;
-  saveChats();renderHistory();renderChat();
+
+/* SIDEBAR CONTROL */
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    if (window.innerWidth <= 600) {
+        sidebar.classList.toggle("open");
+    } else {
+        sidebar.style.display = (sidebar.style.display === "none") ? "flex" : "none";
+    }
 }
-function renderHistory(){
-  const history=document.getElementById("history");history.innerHTML="";
-  chats.forEach(chat=>{
-    const item=document.createElement("div");item.className="history-item";
-    if(currentChat&&currentChat.id===chat.id)item.classList.add("active");
-    item.onclick=()=>selectChat(chat.id);
-    const title=document.createElement("span");title.className="history-title";title.textContent=chat.title||"New Conversation";
-    const del=document.createElement("button");del.className="delete-chat";del.textContent="✕";del.title="Delete conversation";del.setAttribute("aria-label","Delete conversation");
-    del.onclick=event=>deleteChat(chat.id,event);
-    item.appendChild(title);item.appendChild(del);history.appendChild(item);
-  });
+
+function closeSidebar() {
+    if (window.innerWidth <= 600) {
+        document.getElementById("sidebar").classList.remove("open");
+    }
 }
-function renderChat(){
-  const chatElement=document.getElementById("chat");chatElement.innerHTML="";
-  if(!currentChat||!Array.isArray(currentChat.messages)||!currentChat.messages.length){
-    const welcome=document.createElement("div");welcome.className="welcome";
-    welcome.innerHTML='<div class="orb">✦</div><h2>How can I help you today?</h2><p>Welcome to LIM3RD AI.<br>Your personal intelligence platform.</p>';
-    chatElement.appendChild(welcome);return;
-  }
-  currentChat.messages.forEach(message=>displayMessage(message.text,message.role,false));
-  chatElement.scrollTop=chatElement.scrollHeight;
+
+/* CHAT MANAGEMENT */
+function newChat() {
+    currentChat = null;
+    renderChat();
+    renderHistory();
+    closeSidebar();
+    document.getElementById("message").focus();
 }
-function displayMessage(text,role, scroll = true) {
+
+function selectChat(id) {
+    currentChat = chats.find(chat => chat.id === id) || null;
+    if (!currentChat) return;
+    renderChat();
+    renderHistory();
+    closeSidebar();
+}
+
+function deleteChat(id, event) {
+    event.stopPropagation();
+    showCustomConfirm("Delete this conversation?", function(yes) {
+        if (!yes) return;
+        chats = chats.filter(chat => chat.id !== id);
+        if (currentChat && currentChat.id === id) {
+            currentChat = null;
+        }
+        saveChats();
+        renderHistory();
+        renderChat();
+    });
+}
+
+function confirmClearAll() {
+    showCustomConfirm("Delete all conversations permanently?", function(yes) {
+        if (!yes) return;
+        chats = [];
+        currentChat = null;
+        saveChats();
+        renderHistory();
+        renderChat();
+        closeSidebar();
+    });
+}
+
+/* HISTORY UI */
+function renderHistory() {
+    const history = document.getElementById("history");
+    history.innerHTML = "";
+
+    chats.forEach(chat => {
+        const item = document.createElement("div");
+        item.className = "history-item";
+        if (currentChat && currentChat.id === chat.id) {
+            item.classList.add("active");
+        }
+
+        const title = document.createElement("span");
+        title.className = "history-title";
+        title.textContent = chat.title || "New Conversation";
+        title.onclick = () => selectChat(chat.id);
+
+        const del = document.createElement("button");
+        del.className = "delete-chat";
+        del.textContent = "✕";
+        del.onclick = (event) => deleteChat(chat.id, event);
+
+        item.appendChild(title);
+        item.appendChild(del);
+        history.appendChild(item);
+    });
+}
+
+/* RENDER CHAT */
+function renderChat() {
+    const chatElement = document.getElementById("chat");
+    chatElement.innerHTML = "";
+
+    if (!currentChat || !currentChat.messages.length) {
+        const welcome = document.createElement("div");
+        welcome.className = "welcome";
+        welcome.innerHTML = `
+            <div class="orb">✦</div>
+            <h2>How can I help you today?</h2>
+            <p>Welcome to LIM3RD AI.<br>Your personal intelligence platform.</p>
+        `;
+        chatElement.appendChild(welcome);
+        return;
+    }
+
+    currentChat.messages.forEach(msg => {
+        displayMessage(msg.text, msg.role, false);
+    });
+
+    chatElement.scrollTop = chatElement.scrollHeight;
+}
+
+function displayMessage(text, role, scroll=true) {
     const chat = document.getElementById("chat");
-
     const row = document.createElement("div");
     row.className = "message-row";
 
@@ -219,7 +801,6 @@ function displayMessage(text,role, scroll = true) {
     if (role === "assistant" && avatarData) {
         const img = document.createElement("img");
         img.src = avatarData;
-        img.alt = "Assistant avatar";
         avatar.appendChild(img);
     } else {
         avatar.textContent = role === "user" ? "👤" : "✦";
@@ -236,66 +817,212 @@ function displayMessage(text,role, scroll = true) {
     if (scroll) {
         chat.scrollTop = chat.scrollHeight;
     }
+    return content;
 }
-function sendMessage(){
-  const input=document.getElementById("message"),text=input.value.trim();if(!text)return;
-  if(!currentChat){currentChat={id:Date.now(),title:text.substring(0,35),messages:[]};chats.unshift(currentChat);}
-  currentChat.messages.push({role:"user",text});
-  if(currentChat.messages.length===1)currentChat.title=text.substring(0,35);
-  input.value="";
-  const response="Hello! I'm "+(settings.aiName||"LIM3RD AI")+". ✦\n\nYour message has been received.\n\nSelected mode: "+document.getElementById("mode").value.toUpperCase()+"\n\nThe AI engine is not connected yet. This is a development preview.";
-  currentChat.messages.push({role:"assistant",text:response});
-  saveChats();renderHistory();renderChat();input.focus();
+
+/* STREAMING TYPING ANIMATION EFFECT */
+function typeMessageEffect(fullText, role) {
+    const chat = document.getElementById("chat");
+    const row = document.createElement("div");
+    row.className = "message-row";
+
+    const avatar = document.createElement("div");
+    avatar.className = "message-avatar";
+
+    if (avatarData) {
+        const img = document.createElement("img");
+        img.src = avatarData;
+        avatar.appendChild(img);
+    } else {
+        avatar.textContent = "✦";
+    }
+
+    const content = document.createElement("div");
+    content.className = "message-content typing-cursor";
+    row.appendChild(avatar);
+    row.appendChild(content);
+    chat.appendChild(row);
+
+    let i = 0;
+    const speed = 15; // Speed in milliseconds per character
+
+    function typeChar() {
+        if (i < fullText.length) {
+            content.textContent += fullText.charAt(i);
+            i++;
+            chat.scrollTop = chat.scrollHeight;
+            setTimeout(typeChar, speed);
+        } else {
+            content.classList.remove("typing-cursor");
+            saveChats();
+        }
+    }
+
+    typeChar();
 }
-function openSettings(){
-  document.getElementById("aiName").value=settings.aiName||"LIM3RD AI";
-  document.getElementById("personality").value=settings.personality||"Friendly";
-  document.getElementById("language").value=settings.language||"Automatic";
-  document.getElementById("instructions").value=settings.instructions||"";
-  updateAvatar();document.getElementById("settingsOverlay").classList.add("show");
+
+/* OFFLINE AI ENGINE (Locked name: LIM3RD AI) */
+function generateOfflineResponse(input) {
+    const text = input.toLowerCase();
+    const name = "LIM3RD AI";
+    const forcedLang = settings.language || "Automatic";
+
+    let isFilipino = forcedLang === "Filipino" || (forcedLang === "Automatic" && (text.includes("kamusta") || text.includes("sino") || text.includes("salamat") || text.includes("paano") || text.includes("ano") || text.includes("ba")));
+
+    if (isFilipino) {
+        if (text.includes("kamusta") || text.includes("hello") || text.includes("hi")) {
+            return `Magandang araw! Ako si ${name}. Paano kita matutulungan ngayon?`;
+        }
+        if (text.includes("sino ka")) {
+            return `Ako si ${name}, ang iyong personal offline AI assistant.`;
+        }
+        if (text.includes("salamat")) {
+            return `Walang anuman! May gusto ka pa bang malaman?`;
+        }
+        return `Narehistro ko ang iyong mensahe: "${input}". (Offline Mode active)`;
+    } else {
+        if (text.includes("hello") || text.includes("hi") || text.includes("hey")) {
+            return `Hello! I am ${name}. How can I assist you today?`;
+        }
+        if (text.includes("who are you")) {
+            return `I am ${name}, your custom offline AI assistant built by Lim3rd.`;
+        }
+        if (text.includes("thank")) {
+            return `You're very welcome! Let me know if you need anything else.`;
+        }
+        return `I received your message: "${input}". (Offline Mode active)`;
+    }
 }
-function closeSettings(){document.getElementById("settingsOverlay").classList.remove("show");}
-async function saveSettings(){
-  settings={aiName:document.getElementById("aiName").value.trim()||"LIM3RD AI",personality:document.getElementById("personality").value,language:document.getElementById("language").value,instructions:document.getElementById("instructions").value};
-  if(!saveSettingsData())return;
-  closeSettings();await showNotice("Your LIM3RD AI settings have been saved.","Settings Saved");
+
+/* SEND MESSAGE */
+function sendMessage() {
+    const input = document.getElementById("message");
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (!currentChat) {
+        currentChat = {
+            id: Date.now(),
+            title: text.substring(0, 30),
+            messages: []
+        };
+        chats.unshift(currentChat);
+    }
+
+    currentChat.messages.push({ role: "user", text: text });
+    if (currentChat.messages.length === 1) {
+        currentChat.title = text.substring(0, 30);
+    }
+
+    input.value = "";
+    renderChat();
+    renderHistory();
+
+    const mode = document.getElementById("mode").value;
+    let responseText = "";
+
+    if (mode === "offline") {
+        responseText = generateOfflineResponse(text);
+    } else {
+        responseText = `[ONLINE MODE API SIMULATION]\nReceived your query: "${text}"`;
+    }
+
+    currentChat.messages.push({ role: "assistant", text: responseText });
+
+    setTimeout(() => {
+        typeMessageEffect(responseText, "assistant");
+    }, 200);
 }
-document.getElementById("avatarInput").addEventListener("change",function(event){
-  const file=event.target.files[0];if(!file)return;
-  if(!file.type.startsWith("image/")){showNotice("Please select a valid image file.","Invalid File");event.target.value="";return;}
-  if(file.size>1024*1024){showNotice("Please choose an image smaller than 1 MB.","Image Too Large");event.target.value="";return;}
-  const reader=new FileReader();
-  reader.onload=async function(e){
-    const previous=avatarData;avatarData=e.target.result;
-    try{localStorage.setItem("lim3rd_avatar",avatarData);}catch(error){avatarData=previous;await showNotice("Unable to save this image. Try a smaller picture.");return;}
-    updateAvatar();await showNotice("Your profile picture has been updated.","Profile Picture Saved");
-  };
-  reader.onerror=()=>showNotice("The selected image could not be read.");
-  reader.readAsDataURL(file);
+
+/* SETTINGS & AVATAR */
+function openSettings() {
+    document.getElementById("aiName").value = "LIM3RD AI";
+    document.getElementById("personality").value = settings.personality || "Friendly";
+    document.getElementById("language").value = settings.language || "Automatic";
+    document.getElementById("instructions").value = settings.instructions || "";
+    updateAvatar();
+    document.getElementById("settingsOverlay").classList.add("show");
+}
+
+function closeSettings() {
+    document.getElementById("settingsOverlay").classList.remove("show");
+}
+
+function saveSettings() {
+    settings = {
+        aiName: "LIM3RD AI",
+        personality: document.getElementById("personality").value,
+        language: document.getElementById("language").value,
+        instructions: document.getElementById("instructions").value
+    };
+    saveSettingsData();
+    applySettingsUI();
+    closeSettings();
+}
+
+function applySettingsUI() {
+    const fixedName = "LIM3RD AI";
+    document.getElementById("sideProfileName").textContent = fixedName;
+    document.getElementById("headerTitle").textContent = fixedName;
+}
+
+document.getElementById("avatarInput").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (!file || !file.type.startsWith("image/")) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        avatarData = e.target.result;
+        try {
+            localStorage.setItem("lim3rd_avatar", avatarData);
+            updateAvatar();
+        } catch(err) {
+            alert("Image too large.");
+        }
+    };
+    reader.readAsDataURL(file);
 });
-function updateAvatar(){
-  const side=document.getElementById("sideAvatar"),preview=document.getElementById("avatarPreview");
-  side.innerHTML="";preview.innerHTML="";
-  if(avatarData){const img1=document.createElement("img"),img2=document.createElement("img");img1.src=avatarData;img2.src=avatarData;img1.alt="Profile picture";img2.alt="Profile picture";side.appendChild(img1);preview.appendChild(img2);}
-  else{side.textContent="✦";preview.textContent="✦";}
+
+function updateAvatar() {
+    const side = document.getElementById("sideAvatar");
+    const preview = document.getElementById("avatarPreview");
+    side.innerHTML = "";
+    preview.innerHTML = "";
+
+    if (avatarData) {
+        const img1 = document.createElement("img");
+        const img2 = document.createElement("img");
+        img1.src = avatarData;
+        img2.src = avatarData;
+        side.appendChild(img1);
+        preview.appendChild(img2);
+    } else {
+        side.textContent = "✦";
+        preview.textContent = "✦";
+    }
 }
-async function removeAvatar(){
-  if(!avatarData){await showNotice("There is no profile picture to remove.");return;}
-  const ok=await confirmAction("Your current profile picture will be removed.","Remove Profile Picture","Remove");
-  if(!ok)return;
-  avatarData="";localStorage.removeItem("lim3rd_avatar");document.getElementById("avatarInput").value="";updateAvatar();
+
+function removeAvatar() {
+    avatarData = "";
+    localStorage.removeItem("lim3rd_avatar");
+    updateAvatar();
 }
-async function clearAllHistory(){
-  if(!chats.length){await showNotice("There are no conversations to clear.");return;}
-  const ok=await confirmAction("All saved conversations will be permanently deleted. This action cannot be undone.","Clear All Conversations","Delete All");
-  if(!ok)return;
-  chats=[];currentChat=null;saveChats();renderHistory();renderChat();closeSettings();
-  await showNotice("All conversation history has been cleared.","History Cleared");
-}
-document.getElementById("sendBtn").addEventListener("click",sendMessage);
-document.getElementById("message").addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();sendMessage();}});
-document.getElementById("settingsOverlay").addEventListener("click",event=>{if(event.target===event.currentTarget)closeSettings();});
-renderHistory();renderChat();updateAvatar();
+
+/* EVENT LISTENERS */
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
+document.getElementById("message").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+
+/* INIT */
+applySettingsUI();
+renderHistory();
+renderChat();
+updateAvatar();
 </script>
+
 </body>
 </html>
