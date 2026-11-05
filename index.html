@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#090711">
 <title>LIM3RD AI</title>
 <link rel="manifest" href="manifest.json">
+
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
@@ -270,7 +271,6 @@ header {
     line-height:1.7;
 }
 
-/* MESSAGE SLIDE IN ANIMATION */
 .message-row {
     display:flex;
     gap:10px;
@@ -329,7 +329,6 @@ header {
     border-color:#7844a8;
 }
 
-/* TYPING CURSOR ANIMATION */
 .typing-cursor::after {
     content: '▋';
     display: inline-block;
@@ -564,8 +563,8 @@ header {
         <div class="header-title" id="headerTitle">LIM3RD AI</div>
     </div>
     <select class="mode" id="mode">
-        <option value="offline">OFFLINE ENGINE</option>
         <option value="online">ONLINE API (BACKEND)</option>
+        <option value="offline">OFFLINE ENGINE</option>
     </select>
 </header>
 
@@ -580,9 +579,9 @@ header {
 <footer class="input-section">
     <div class="input-box">
         <input id="message" type="text" placeholder="Message LIM3RD AI..." autocomplete="off">
-        <button class="send-btn" id="sendBtn">➤</button>
+        <button class="send-btn" id="sendBtn" onclick="handleSend()">➤</button>
     </div>
-    <div class="disclaimer">LIM3RD AI · Version 0.5 (Animated Edition)</div>
+    <div class="disclaimer">LIM3RD AI · Secure Proxy Edition</div>
 </footer>
 </div>
 
@@ -592,8 +591,8 @@ header {
     <h2>⚙ LIM3RD AI Settings</h2>
     <div class="avatar-preview" id="avatarPreview">✦</div>
     
-    <label>AI Display Name (Locked)</label>
-    <input id="aiName" value="LIM3RD AI" disabled style="opacity: 0.5; cursor: not-allowed;">
+    <label>AI Display Name</label>
+    <input id="aiName" value="LIM3RD AI">
 
     <label>Choose Profile Picture</label>
     <input type="file" id="avatarInput" accept="image/*">
@@ -652,6 +651,26 @@ try {
 let avatarData = localStorage.getItem("lim3rd_avatar") || "";
 let confirmCallback = null;
 
+document.addEventListener("DOMContentLoaded", () => {
+    if (settings.aiName) {
+        document.getElementById("aiName").value = settings.aiName;
+        document.getElementById("headerTitle").textContent = settings.aiName;
+        document.getElementById("sideProfileName").textContent = settings.aiName;
+    }
+    if (settings.personality) document.getElementById("personality").value = settings.personality;
+    if (settings.language) document.getElementById("language").value = settings.language;
+    if (settings.instructions) document.getElementById("instructions").value = settings.instructions;
+    
+    updateAvatarDisplay();
+    renderHistory();
+    
+    document.getElementById("message").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            handleSend();
+        }
+    });
+});
+
 function saveChats() {
     try {
         localStorage.setItem("lim3rd_chats", JSON.stringify(chats));
@@ -662,11 +681,6 @@ function saveChats() {
     }
 }
 
-function saveSettingsData() {
-    localStorage.setItem("lim3rd_settings", JSON.stringify(settings));
-}
-
-// Custom Modal Confirm Handler
 function showCustomConfirm(msg, callback) {
     document.getElementById("confirmMessage").textContent = msg;
     document.getElementById("customConfirmOverlay").classList.add("show");
@@ -681,7 +695,6 @@ function closeConfirmModal(result) {
     }
 }
 
-/* SIDEBAR CONTROL */
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
     if (window.innerWidth <= 600) {
@@ -697,7 +710,59 @@ function closeSidebar() {
     }
 }
 
-/* CHAT MANAGEMENT */
+function openSettings() {
+    document.getElementById("settingsOverlay").classList.add("show");
+}
+
+function closeSettings() {
+    document.getElementById("settingsOverlay").classList.remove("show");
+}
+
+function saveSettings() {
+    settings.aiName = document.getElementById("aiName").value || "LIM3RD AI";
+    settings.personality = document.getElementById("personality").value;
+    settings.language = document.getElementById("language").value;
+    settings.instructions = document.getElementById("instructions").value;
+    
+    localStorage.setItem("lim3rd_settings", JSON.stringify(settings));
+    
+    document.getElementById("headerTitle").textContent = settings.aiName;
+    document.getElementById("sideProfileName").textContent = settings.aiName;
+    closeSettings();
+}
+
+function removeAvatar() {
+    avatarData = "";
+    localStorage.removeItem("lim3rd_avatar");
+    updateAvatarDisplay();
+}
+
+function updateAvatarDisplay() {
+    const avatarEl = document.getElementById("sideAvatar");
+    const previewEl = document.getElementById("avatarPreview");
+    
+    if (avatarData) {
+        avatarEl.innerHTML = `<img src="${avatarData}">`;
+        previewEl.innerHTML = `<img src="${avatarData}">`;
+    } else {
+        avatarEl.textContent = "✦";
+        previewEl.textContent = "✦";
+    }
+}
+
+document.getElementById("avatarInput").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(uploadEvent) {
+            avatarData = uploadEvent.target.result;
+            localStorage.setItem("lim3rd_avatar", avatarData);
+            updateAvatarDisplay();
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 function newChat() {
     currentChat = null;
     renderChat();
@@ -740,7 +805,6 @@ function confirmClearAll() {
     });
 }
 
-/* HISTORY UI */
 function renderHistory() {
     const history = document.getElementById("history");
     history.innerHTML = "";
@@ -768,7 +832,6 @@ function renderHistory() {
     });
 }
 
-/* RENDER CHAT */
 function renderChat() {
     const chatElement = document.getElementById("chat");
     chatElement.innerHTML = "";
@@ -826,7 +889,6 @@ function displayMessage(text, role, scroll=true) {
     return content;
 }
 
-/* STREAMING TYPING ANIMATION EFFECT */
 function typeMessageEffect(fullText, role) {
     const chat = document.getElementById("chat");
     const row = document.createElement("div");
@@ -850,7 +912,7 @@ function typeMessageEffect(fullText, role) {
     chat.appendChild(row);
 
     let i = 0;
-    const speed = 15; // Speed in milliseconds per character
+    const speed = 12;
 
     function typeChar() {
         if (i < fullText.length) {
@@ -867,10 +929,91 @@ function typeMessageEffect(fullText, role) {
     typeChar();
 }
 
-/* OFFLINE AI ENGINE */
+/* SERVER PROXY API CALL (NAKAPUNTA NA SA RENDER BACKEND) */
+async function handleSend() {
+    const inputField = document.getElementById("message");
+    const text = inputField.value.trim();
+    if (!text) return;
+
+    inputField.value = "";
+
+    if (!currentChat) {
+        currentChat = {
+            id: Date.now(),
+            title: text.length > 25 ? text.substring(0, 25) + "..." : text,
+            messages: []
+        };
+        chats.unshift(currentChat);
+    }
+
+    currentChat.messages.push({ role: "user", text: text });
+    saveChats();
+    renderHistory();
+    renderChat();
+
+    const mode = document.getElementById("mode").value;
+
+    if (mode === "offline") {
+        const reply = generateOfflineResponse(text);
+        currentChat.messages.push({ role: "assistant", text: reply });
+        typeMessageEffect(reply, "assistant");
+        return;
+    }
+
+    const loadingRow = document.createElement("div");
+    loadingRow.className = "message-row";
+    loadingRow.innerHTML = `<div class="message-avatar">✦</div><div class="message-content typing-cursor">Thinking...</div>`;
+    document.getElementById("chat").appendChild(loadingRow);
+    const chatContainer = document.getElementById("chat");
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    try {
+        let messagesPayload = [
+            {
+                role: "system",
+                content: `You are ${settings.aiName || "LIM3RD AI"}, an intelligent assistant. Personality: ${settings.personality || 'Friendly'}. Custom instructions: ${settings.instructions || 'None'}.`
+            }
+        ];
+
+        currentChat.messages.forEach(m => {
+            messagesPayload.push({
+                role: m.role === "user" ? "user" : "assistant",
+                content: m.text
+            });
+        });
+
+        // 🔗 NAKAKONEKTA NA SA IYONG RENDER URL
+        const RENDER_BACKEND_URL = 'https://lim3rd-ai-1.onrender.com/api/chat';
+
+        const response = await fetch(RENDER_BACKEND_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: messagesPayload })
+        });
+
+        const data = await response.json();
+        loadingRow.remove();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        const reply = data.reply;
+        currentChat.messages.push({ role: "assistant", text: reply });
+        typeMessageEffect(reply, "assistant");
+
+    } catch (error) {
+        console.error("Backend Proxy Error:", error);
+        loadingRow.remove();
+        const errText = `❌ Error: ${error.message}`;
+        currentChat.messages.push({ role: "assistant", text: errText });
+        displayMessage(errText, "assistant");
+    }
+}
+
 function generateOfflineResponse(input) {
     const text = input.toLowerCase();
-    const name = "LIM3RD AI";
+    const name = settings.aiName || "LIM3RD AI";
     const forcedLang = settings.language || "Automatic";
 
     let isFilipino = forcedLang === "Filipino" || (forcedLang === "Automatic" && (text.includes("kamusta") || text.includes("sino") || text.includes("salamat") || text.includes("paano") || text.includes("ano") || text.includes("ba")));
@@ -880,172 +1023,16 @@ function generateOfflineResponse(input) {
             return `Magandang araw! Ako si ${name}. Paano kita matutulungan ngayon?`;
         }
         if (text.includes("sino ka")) {
-            return `Ako si ${name}, ang iyong personal offline AI assistant.`;
+            return `Ako si ${name}, ang iyong personal AI assistant.`;
         }
-        if (text.includes("salamat")) {
-            return `Walang anuman! May gusto ka pa bang malaman?`;
-        }
-        return `Narehistro ko ang iyong mensahe: "${input}". (Offline Mode active)`;
+        return `Narehistro ko ang iyong mensahe: "${input}".`;
     } else {
         if (text.includes("hello") || text.includes("hi") || text.includes("hey")) {
             return `Hello! I am ${name}. How can I assist you today?`;
         }
-        if (text.includes("who are you")) {
-            return `I am ${name}, your custom offline AI assistant built by Lim3rd.`;
-        }
-        if (text.includes("thank")) {
-            return `You're very welcome! Let me know if you need anything else.`;
-        }
-        return `I received your message: "${input}". (Offline Mode active)`;
+        return `Received your message: "${input}".`;
     }
 }
-
-/* SEND MESSAGE (CONNECTED TO BACKEND API) */
-async function sendMessage() {
-    const input = document.getElementById("message");
-    const text = input.value.trim();
-    if (!text) return;
-
-    if (!currentChat) {
-        currentChat = {
-            id: Date.now(),
-            title: text.substring(0, 30),
-            messages: []
-        };
-        chats.unshift(currentChat);
-    }
-
-    currentChat.messages.push({ role: "user", text: text });
-    if (currentChat.messages.length === 1) {
-        currentChat.title = text.substring(0, 30);
-    }
-
-    input.value = "";
-    renderChat();
-    renderHistory();
-
-    const mode = document.getElementById("mode").value;
-    let responseText = "";
-
-    if (mode === "offline") {
-        // Gagamitin ang Built-in Offline Rules
-        responseText = generateOfflineResponse(text);
-        currentChat.messages.push({ role: "assistant", text: responseText });
-        typeMessageEffect(responseText, "assistant");
-    } else {
-        // TATAWAG SA ONLINE BACKEND SERVER SA RENDER
-        const RENDER_BACKEND_URL = 'https://lim3rd-ai-1.onrender.com/api/chat';
-
-        try {
-            const response = await fetch(BACKEND_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: text })
-            });
-
-            const data = await response.json();
-            responseText = data.reply || "Walang naibalik na sagot ang server.";
-
-            currentChat.messages.push({ role: "assistant", text: responseText });
-            typeMessageEffect(responseText, "assistant");
-
-        } catch (error) {
-            responseText = "❌ Hindi makakonekta sa LIM3RD AI Server. Tiyaking aktibo o nagigising pa ang backend sa Render.";
-            currentChat.messages.push({ role: "assistant", text: responseText });
-            typeMessageEffect(responseText, "assistant");
-        }
-    }
-}
-
-/* SETTINGS & AVATAR */
-function openSettings() {
-    document.getElementById("aiName").value = "LIM3RD AI";
-    document.getElementById("personality").value = settings.personality || "Friendly";
-    document.getElementById("language").value = settings.language || "Automatic";
-    document.getElementById("instructions").value = settings.instructions || "";
-    updateAvatar();
-    document.getElementById("settingsOverlay").classList.add("show");
-}
-
-function closeSettings() {
-    document.getElementById("settingsOverlay").classList.remove("show");
-}
-
-function saveSettings() {
-    settings = {
-        aiName: "LIM3RD AI",
-        personality: document.getElementById("personality").value,
-        language: document.getElementById("language").value,
-        instructions: document.getElementById("instructions").value
-    };
-    saveSettingsData();
-    applySettingsUI();
-    closeSettings();
-}
-
-function applySettingsUI() {
-    const fixedName = "LIM3RD AI";
-    document.getElementById("sideProfileName").textContent = fixedName;
-    document.getElementById("headerTitle").textContent = fixedName;
-}
-
-document.getElementById("avatarInput").addEventListener("change", function(event) {
-    const file = event.target.files[0];
-    if (!file || !file.type.startsWith("image/")) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        avatarData = e.target.result;
-        try {
-            localStorage.setItem("lim3rd_avatar", avatarData);
-            updateAvatar();
-        } catch(err) {
-            alert("Image too large.");
-        }
-    };
-    reader.readAsDataURL(file);
-});
-
-function updateAvatar() {
-    const side = document.getElementById("sideAvatar");
-    const preview = document.getElementById("avatarPreview");
-    side.innerHTML = "";
-    preview.innerHTML = "";
-
-    if (avatarData) {
-        const img1 = document.createElement("img");
-        const img2 = document.createElement("img");
-        img1.src = avatarData;
-        img2.src = avatarData;
-        side.appendChild(img1);
-        preview.appendChild(img2);
-    } else {
-        side.textContent = "✦";
-        preview.textContent = "✦";
-    }
-}
-
-function removeAvatar() {
-    avatarData = "";
-    localStorage.removeItem("lim3rd_avatar");
-    updateAvatar();
-}
-
-/* EVENT LISTENERS */
-document.getElementById("sendBtn").addEventListener("click", sendMessage);
-document.getElementById("message").addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        sendMessage();
-    }
-});
-
-/* INIT */
-applySettingsUI();
-renderHistory();
-renderChat();
-updateAvatar();
 </script>
-
 </body>
 </html>
