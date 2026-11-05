@@ -565,7 +565,7 @@ header {
     </div>
     <select class="mode" id="mode">
         <option value="offline">OFFLINE ENGINE</option>
-        <option value="online">ONLINE API</option>
+        <option value="online">ONLINE API (BACKEND)</option>
     </select>
 </header>
 
@@ -867,7 +867,7 @@ function typeMessageEffect(fullText, role) {
     typeChar();
 }
 
-/* OFFLINE AI ENGINE (Locked name: LIM3RD AI) */
+/* OFFLINE AI ENGINE */
 function generateOfflineResponse(input) {
     const text = input.toLowerCase();
     const name = "LIM3RD AI";
@@ -900,8 +900,8 @@ function generateOfflineResponse(input) {
     }
 }
 
-/* SEND MESSAGE */
-function sendMessage() {
+/* SEND MESSAGE (CONNECTED TO BACKEND API) */
+async function sendMessage() {
     const input = document.getElementById("message");
     const text = input.value.trim();
     if (!text) return;
@@ -928,16 +928,33 @@ function sendMessage() {
     let responseText = "";
 
     if (mode === "offline") {
+        // Gagamitin ang Built-in Offline Rules
         responseText = generateOfflineResponse(text);
-    } else {
-        responseText = `[ONLINE MODE API SIMULATION]\nReceived your query: "${text}"`;
-    }
-
-    currentChat.messages.push({ role: "assistant", text: responseText });
-
-    setTimeout(() => {
+        currentChat.messages.push({ role: "assistant", text: responseText });
         typeMessageEffect(responseText, "assistant");
-    }, 200);
+    } else {
+        // TATAWAG SA ONLINE BACKEND SERVER SA RENDER
+        const BACKEND_URL = "https://lim3rd-ai-backend.onrender.com/api/chat"; // Palitan kung iba ang Render URL mo
+
+        try {
+            const response = await fetch(BACKEND_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+            responseText = data.reply || "Walang naibalik na sagot ang server.";
+
+            currentChat.messages.push({ role: "assistant", text: responseText });
+            typeMessageEffect(responseText, "assistant");
+
+        } catch (error) {
+            responseText = "❌ Hindi makakonekta sa LIM3RD AI Server. Tiyaking aktibo o nagigising pa ang backend sa Render.";
+            currentChat.messages.push({ role: "assistant", text: responseText });
+            typeMessageEffect(responseText, "assistant");
+        }
+    }
 }
 
 /* SETTINGS & AVATAR */
