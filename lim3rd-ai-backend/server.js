@@ -7,10 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Kunin ang API Key mula sa Environment Variable (.env file)
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Endpoint na tatawagin ng iyong LIM3RD AI front-end app
 app.post('/api/chat', async (req, res) => {
   try {
     const { message } = req.body;
@@ -19,7 +17,7 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Kailangan ng message prompt.' });
     }
 
-    // Paggamit ng pinakabagong Gemini 2.5 Flash model
+    // Paggamit ng gemini-2.5-flash para sa @google/genai SDK
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: message,
@@ -28,7 +26,7 @@ app.post('/api/chat', async (req, res) => {
     res.json({ reply: response.text });
   } catch (error) {
     console.error('Error sa Gemini API:', error);
-    res.status(500).json({ error: 'Nagkaroon ng problema sa server response.' });
+    res.status(500).json({ reply: `❌ Backend Error: ${error.message}` });
   }
 });
 
