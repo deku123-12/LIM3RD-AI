@@ -7,6 +7,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 👉 IDINAGDAG ITO PARA MASURI SA LOGS
+console.log("API Key Status:", process.env.GROQ_API_KEY ? `Nakalagay (Haba: ${process.env.GROQ_API_KEY.length})` : "WALA / HINDI NABABASA!");
+
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
@@ -23,7 +26,6 @@ app.post('/api/chat', async (req, res) => {
       throw new Error('Walang nahanap na GROQ_API_KEY sa Render Environment Variables.');
     }
 
-    // Ginagamit na ngayon ang model na nasa allowed list mo
     const chatCompletion = await groq.chat.completions.create({
       messages: messages,
       model: 'openai/gpt-oss-20b',
