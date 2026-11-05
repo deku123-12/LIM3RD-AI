@@ -23,7 +23,6 @@ app.post('/api/chat', async (req, res) => {
       throw new Error('Walang nahanap na GROQ_API_KEY sa Render Environment Variables.');
     }
 
-    // Pwede mong gamitin ang 'openai/gpt-oss-20b' o 'llama-3.3-70b-versatile'
     const chatCompletion = await groq.chat.completions.create({
       messages: messages,
       model: 'llama-3.3-70b-versatile',
