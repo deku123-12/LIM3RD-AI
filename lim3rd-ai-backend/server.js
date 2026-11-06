@@ -5,12 +5,9 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
 
-// Tinitiyak na malinis ang API Key (binubura ang spaces/newlines sa magkabilang dulo)
 const rawApiKey = process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.trim() : '';
-
-console.log("API Key Status:", rawApiKey ? `Nakalagay (Haba: ${rawApiKey.length})` : "WALA / HINDI NABABASA!");
 
 const groq = new Groq({
   apiKey: rawApiKey
@@ -18,33 +15,62 @@ const groq = new Groq({
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { messages, image } = req.body;
     
     if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: 'Kailangan ng valid message array.' });
+      return res.status(400).json({ error: 'Valid message array required.' });
     }
 
     if (!rawApiKey) {
-      throw new Error('Walang nahanap na GROQ_API_KEY sa Render Environment Variables.');
+      throw new Error('GROQ_API_KEY is missing.');
+    }
+
+    const lastUserMessage = messages[messages.length - 1].content;
+
+    if (typeof lastUserMessage === 'string' && (lastUserMessage.toLowerCase().startsWith('/image') || lastUserMessage.toLowerCase().includes('generate image') || lastUserMessage.toLowerCase().includes('draw '))) {
+      let prompt = lastUserMessage.replace('/image', '').replace(/generate image of/i, '').replace(/draw/i, '').trim();
+      if (!prompt) prompt = "beautiful aesthetic digital art";
+
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+      
+      return res.json({ 
+        reply: `![Generated Image](${imageUrl})` 
+      });
+    }
+
+    let modelToUse = 'openai/gpt-oss-20b';
+    let formattedMessages = [...messages];
+
+    if (image) {
+      modelToUse = 'llama-3.2-11b-vision-preview';
+      const lastMsg = formattedMessages.pop();
+      
+      formattedMessages.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: typeof lastMsg.content === 'string' ? lastMsg.content : "Describe this image." },
+          { type: 'image_url', image_url: { url: image } }
+        ]
+      });
     }
 
     const chatCompletion = await groq.chat.completions.create({
-      messages: messages,
-      model: 'openai/gpt-oss-20b', // Siguraduhing allowed model ito sa Groq settings mo
+      messages: formattedMessages,
+      model: modelToUse,
       temperature: 0.7,
       max_tokens: 1024,
     });
 
-    const reply = chatCompletion.choices[0]?.message?.content || "Walang naibalik na sagot.";
+    const reply = chatCompletion.choices[0]?.message?.content || "";
     res.json({ reply });
 
   } catch (error) {
-    console.error('Server API Error:', error.message);
+    console.error('Server Error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 LIM3RD AI Backend running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
