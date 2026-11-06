@@ -235,7 +235,6 @@ header {
     text-align:center;
     padding:50px 10px;
     margin:auto;
-    animation: fadeIn 0.5s ease-out;
 }
 
 .orb {
@@ -273,18 +272,6 @@ header {
     gap:10px;
     margin-bottom:22px;
     align-items:flex-start;
-    animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes slideUpFade {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .user-row {
@@ -332,6 +319,50 @@ header {
     margin-top: 8px;
 }
 
+/* CODE BLOCK STYLING WITH COPY BUTTON */
+.code-block-wrapper {
+    background: #0d0914;
+    border: 1px solid #38205c;
+    border-radius: 8px;
+    margin: 10px 0;
+    overflow: hidden;
+    font-family: monospace;
+}
+
+.code-header {
+    background: #1e1330;
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.copy-btn {
+    background: #382b49;
+    border: none;
+    color: var(--light);
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: background 0.2s;
+}
+
+.copy-btn:hover {
+    background: var(--purple);
+    color: white;
+}
+
+.code-content {
+    padding: 12px;
+    overflow-x: auto;
+    font-size: 13px;
+    color: #e2d9f3;
+    white-space: pre;
+}
+
 .typing-cursor::after {
     content: '▋';
     display: inline-block;
@@ -359,11 +390,6 @@ header {
     border-radius:13px;
     padding:7px;
     align-items: center;
-    transition: border-color 0.2s;
-}
-
-.input-box:focus-within {
-    border-color: var(--purple);
 }
 
 .input-actions-wrapper {
@@ -382,11 +408,6 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s;
-}
-
-.plus-btn:hover {
-    transform: scale(1.1);
 }
 
 .plus-menu {
@@ -421,7 +442,6 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
-    transition: background 0.2s;
 }
 
 .plus-menu-item:hover {
@@ -448,11 +468,6 @@ header {
     font-size:18px;
     cursor:pointer;
     height: 38px;
-    transition: transform 0.1s, background 0.2s;
-}
-
-.send-btn:active {
-    transform: scale(0.92);
 }
 
 #imagePreviewBox {
@@ -473,6 +488,25 @@ header {
     object-fit: cover;
 }
 
+#stopBtnBox {
+    display: none;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.stop-gen-btn {
+    background: #241a32;
+    border: 1px solid #7040a0;
+    color: var(--light);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .disclaimer {
     color:#716582;
     font-size:10px;
@@ -489,13 +523,10 @@ header {
     justify-content:center;
     z-index:20;
     padding:15px;
-    opacity: 0;
-    transition: opacity 0.25s ease;
 }
 
 .overlay.show {
     display:flex;
-    opacity: 1;
 }
 
 .modal {
@@ -507,25 +538,12 @@ header {
     border:1px solid #7040a0;
     border-radius:16px;
     padding:20px;
-    transform: scale(0.9);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.overlay.show .modal {
-    transform: scale(1);
 }
 
 .modal h2 {
     color:var(--light);
     margin-bottom:15px;
     font-size: 18px;
-}
-
-.modal p {
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 20px;
-    line-height: 1.5;
 }
 
 .modal label {
@@ -604,16 +622,12 @@ header {
         bottom:0;
         left:0;
         transform:translateX(-100%);
-        box-shadow:10px 0 30px #0008;
     }
     .sidebar.open {
         transform:translateX(0);
     }
     .main {
         width:100%;
-    }
-    .chat {
-        padding:15px;
     }
 }
 </style>
@@ -657,6 +671,12 @@ header {
 </main>
 
 <footer class="input-section">
+    <div id="stopBtnBox">
+        <button type="button" class="stop-gen-btn" onclick="stopGeneration()">
+            ■ Stop generating
+        </button>
+    </div>
+
     <div id="imagePreviewBox">
         <img id="imagePreview">
         <span style="font-size:12px; color:var(--muted); flex:1; overflow:hidden; text-overflow:ellipsis;" id="imageName">Na-attach na larawan</span>
@@ -746,6 +766,9 @@ try {
 let avatarData = localStorage.getItem("lim3rd_avatar") || "";
 let confirmCallback = null;
 let selectedBase64Image = null;
+let currentAbortController = null;
+let isTypingActive = false;
+let currentTypingTimer = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     if (settings.aiName) {
@@ -800,6 +823,22 @@ function clearSelectedImage() {
     selectedBase64Image = null;
     document.getElementById("imageInput").value = "";
     document.getElementById("imagePreviewBox").style.display = "none";
+}
+
+function stopGeneration() {
+    if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+    }
+    isTypingActive = false;
+    if (currentTypingTimer) {
+        clearTimeout(currentTypingTimer);
+        currentTypingTimer = null;
+    }
+    document.getElementById("stopBtnBox").style.display = "none";
+    
+    const loadingRow = document.getElementById("loadingRow");
+    if (loadingRow) loadingRow.remove();
 }
 
 function saveChats() {
@@ -895,6 +934,7 @@ document.getElementById("avatarInput").addEventListener("change", function(e) {
 });
 
 function newChat() {
+    stopGeneration();
     currentChat = null;
     renderChat();
     renderHistory();
@@ -903,6 +943,7 @@ function newChat() {
 }
 
 function selectChat(id) {
+    stopGeneration();
     currentChat = chats.find(chat => chat.id === id) || null;
     if (!currentChat) return;
     renderChat();
@@ -986,6 +1027,40 @@ function renderChat() {
     chatElement.scrollTop = chatElement.scrollHeight;
 }
 
+function formatMessageContent(text) {
+    let formatted = text
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/!\[(.*?)\]\((.*?)\)/g, '<br><img src="$2" style="max-width:100%; border-radius:8px; margin-top:8px;" alt="$1">');
+
+    formatted = formatted.replace(/```([a-z]*)\n([\s\S]*?)```/g, function(match, lang, code) {
+        const uniqueId = 'code_' + Math.random().toString(36.substring(2, 9));
+        const escapedCode = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return `
+            <div class="code-block-wrapper">
+                <div class="code-header">
+                    <span>${lang || 'code'}</span>
+                    <button class="copy-btn" onclick="copyCodeText('${uniqueId}', this)">Copy</button>
+                </div>
+                <div class="code-content" id="${uniqueId}">${escapedCode}</div>
+            </div>
+        `;
+    });
+
+    return formatted;
+}
+
+function copyCodeText(elementId, btn) {
+    const codeEl = document.getElementById(elementId);
+    if (!codeEl) return;
+    const textToCopy = codeEl.innerText;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        btn.textContent = "Copied!";
+        setTimeout(() => {
+            btn.textContent = "Copy";
+        }, 2000);
+    });
+}
+
 function displayMessage(text, role, scroll=true) {
     const chat = document.getElementById("chat");
     const row = document.createElement("div");
@@ -1008,12 +1083,7 @@ function displayMessage(text, role, scroll=true) {
 
     const content = document.createElement("div");
     content.className = "message-content";
-    
-    let formattedText = text
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        .replace(/!\[(.*?)\]\((.*?)\)/g, '<br><img src="$2" style="max-width:100%; border-radius:8px; margin-top:8px;" alt="$1">');
-    
-    content.innerHTML = formattedText;
+    content.innerHTML = formatMessageContent(text);
 
     row.appendChild(avatar);
     row.appendChild(content);
@@ -1047,17 +1117,21 @@ function typeMessageEffect(fullText, role) {
     row.appendChild(content);
     chat.appendChild(row);
 
+    isTypingActive = true;
     let i = 0;
-    const speed = 12;
+    const speed = 10;
 
     function typeChar() {
+        if (!isTypingActive) return;
         if (i < fullText.length) {
             content.textContent += fullText.charAt(i);
             i++;
             chat.scrollTop = chat.scrollHeight;
-            setTimeout(typeChar, speed);
+            currentTypingTimer = setTimeout(typeChar, speed);
         } else {
             content.classList.remove("typing-cursor");
+            content.innerHTML = formatMessageContent(fullText);
+            document.getElementById("stopBtnBox").style.display = "none";
             saveChats();
         }
     }
@@ -1093,16 +1167,21 @@ async function handleSend() {
     if (mode === "offline") {
         const reply = generateOfflineResponse(text);
         currentChat.messages.push({ role: "assistant", text: reply });
+        document.getElementById("stopBtnBox").style.display = "block";
         typeMessageEffect(reply, "assistant");
         return;
     }
 
     const loadingRow = document.createElement("div");
     loadingRow.className = "message-row";
+    loadingRow.id = "loadingRow";
     loadingRow.innerHTML = `<div class="message-avatar">✦</div><div class="message-content typing-cursor">Thinking...</div>`;
     document.getElementById("chat").appendChild(loadingRow);
     const chatContainer = document.getElementById("chat");
     chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    document.getElementById("stopBtnBox").style.display = "block";
+    currentAbortController = new AbortController();
 
     try {
         let messagesPayload = [
@@ -1127,11 +1206,13 @@ async function handleSend() {
             body: JSON.stringify({ 
                 messages: messagesPayload,
                 image: currentImg 
-            })
+            }),
+            signal: currentAbortController.signal
         });
 
         const data = await response.json();
-        loadingRow.remove();
+        const lr = document.getElementById("loadingRow");
+        if (lr) lr.remove();
 
         if (data.error) {
             throw new Error(data.error);
@@ -1142,8 +1223,13 @@ async function handleSend() {
         typeMessageEffect(reply, "assistant");
 
     } catch (error) {
-        console.error("Backend Proxy Error:", error);
-        loadingRow.remove();
+        if (error.name === 'AbortError') {
+            return;
+        }
+        const lr = document.getElementById("loadingRow");
+        if (lr) lr.remove();
+        document.getElementById("stopBtnBox").style.display = "none";
+        
         const errText = `❌ Error: ${error.message}`;
         currentChat.messages.push({ role: "assistant", text: errText });
         displayMessage(errText, "assistant");
