@@ -235,6 +235,7 @@ header {
     text-align:center;
     padding:50px 10px;
     margin:auto;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .orb {
@@ -272,6 +273,18 @@ header {
     gap:10px;
     margin-bottom:22px;
     align-items:flex-start;
+    animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .user-row {
@@ -319,7 +332,6 @@ header {
     margin-top: 8px;
 }
 
-/* CODE BLOCK STYLING WITH COPY BUTTON */
 .code-block-wrapper {
     background: #0d0914;
     border: 1px solid #38205c;
@@ -390,6 +402,11 @@ header {
     border-radius:13px;
     padding:7px;
     align-items: center;
+    transition: border-color 0.2s;
+}
+
+.input-box:focus-within {
+    border-color: var(--purple);
 }
 
 .input-actions-wrapper {
@@ -408,6 +425,11 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.2s;
+}
+
+.plus-btn:hover {
+    transform: scale(1.1);
 }
 
 .plus-menu {
@@ -442,6 +464,7 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
+    transition: background 0.2s;
 }
 
 .plus-menu-item:hover {
@@ -468,6 +491,11 @@ header {
     font-size:18px;
     cursor:pointer;
     height: 38px;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.send-btn:active {
+    transform: scale(0.92);
 }
 
 #imagePreviewBox {
@@ -505,6 +533,11 @@ header {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    transition: background 0.2s;
+}
+
+.stop-gen-btn:hover {
+    background: #36264d;
 }
 
 .disclaimer {
@@ -523,10 +556,13 @@ header {
     justify-content:center;
     z-index:20;
     padding:15px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
 }
 
 .overlay.show {
     display:flex;
+    opacity: 1;
 }
 
 .modal {
@@ -538,12 +574,25 @@ header {
     border:1px solid #7040a0;
     border-radius:16px;
     padding:20px;
+    transform: scale(0.9);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overlay.show .modal {
+    transform: scale(1);
 }
 
 .modal h2 {
     color:var(--light);
     margin-bottom:15px;
     font-size: 18px;
+}
+
+.modal p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.5;
 }
 
 .modal label {
@@ -622,12 +671,16 @@ header {
         bottom:0;
         left:0;
         transform:translateX(-100%);
+        box-shadow:10px 0 30px #0008;
     }
     .sidebar.open {
         transform:translateX(0);
     }
     .main {
         width:100%;
+    }
+    .chat {
+        padding:15px;
     }
 }
 </style>
@@ -1033,7 +1086,7 @@ function formatMessageContent(text) {
         .replace(/!\[(.*?)\]\((.*?)\)/g, '<br><img src="$2" style="max-width:100%; border-radius:8px; margin-top:8px;" alt="$1">');
 
     formatted = formatted.replace(/```([a-z]*)\n([\s\S]*?)```/g, function(match, lang, code) {
-        const uniqueId = 'code_' + Math.random().toString(36.substring(2, 9));
+        const uniqueId = 'code_' + Math.random().toString(36).substring(2, 9);
         const escapedCode = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         return `
             <div class="code-block-wrapper">
