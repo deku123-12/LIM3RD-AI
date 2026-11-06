@@ -42,7 +42,7 @@ app.post('/api/chat', async (req, res) => {
     let formattedMessages = [...messages];
 
     if (image) {
-      modelToUse = 'llama-3.2-11b-vision-preview';
+      modelToUse = 'llama-3.2-11b-vision';
       const lastMsg = formattedMessages.pop();
       
       formattedMessages.push({
