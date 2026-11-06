@@ -7,11 +7,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 👉 IDINAGDAG ITO PARA MASURI SA LOGS
-console.log("API Key Status:", process.env.GROQ_API_KEY ? `Nakalagay (Haba: ${process.env.GROQ_API_KEY.length})` : "WALA / HINDI NABABASA!");
+// Tinitiyak na malinis ang API Key (binubura ang spaces/newlines sa magkabilang dulo)
+const rawApiKey = process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.trim() : '';
+
+console.log("API Key Status:", rawApiKey ? `Nakalagay (Haba: ${rawApiKey.length})` : "WALA / HINDI NABABASA!");
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
+  apiKey: rawApiKey
 });
 
 app.post('/api/chat', async (req, res) => {
@@ -22,13 +24,13 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Kailangan ng valid message array.' });
     }
 
-    if (!process.env.GROQ_API_KEY) {
+    if (!rawApiKey) {
       throw new Error('Walang nahanap na GROQ_API_KEY sa Render Environment Variables.');
     }
 
     const chatCompletion = await groq.chat.completions.create({
       messages: messages,
-      model: 'openai/gpt-oss-20b',
+      model: 'openai/gpt-oss-20b', // Siguraduhing allowed model ito sa Groq settings mo
       temperature: 0.7,
       max_tokens: 1024,
     });
