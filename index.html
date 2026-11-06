@@ -40,7 +40,6 @@ body {
     overflow:hidden;
 }
 
-/* SIDEBAR & ANIMATIONS */
 .sidebar {
     width:270px;
     background:var(--panel);
@@ -179,7 +178,6 @@ body {
     margin-top:4px;
 }
 
-/* MAIN */
 .main {
     flex:1;
     min-width:0;
@@ -226,7 +224,6 @@ header {
     font-size:11px;
 }
 
-/* CHAT & MESSAGE ANIMATIONS */
 .chat {
     flex:1;
     overflow-y:auto;
@@ -329,6 +326,12 @@ header {
     border-color:#7844a8;
 }
 
+.message-content img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
 .typing-cursor::after {
     content: '▋';
     display: inline-block;
@@ -342,7 +345,6 @@ header {
     50% { opacity: 0; }
 }
 
-/* INPUT */
 .input-section {
     padding:12px 15px 15px;
     background:var(--panel);
@@ -356,11 +358,74 @@ header {
     border:1px solid #57377c;
     border-radius:13px;
     padding:7px;
+    align-items: center;
     transition: border-color 0.2s;
 }
 
 .input-box:focus-within {
     border-color: var(--purple);
+}
+
+.input-actions-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.plus-btn {
+    background: transparent;
+    border: none;
+    color: var(--light);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.plus-btn:hover {
+    transform: scale(1.1);
+}
+
+.plus-menu {
+    position: absolute;
+    bottom: 50px;
+    left: 0;
+    background: #171024;
+    border: 1px solid #7040a0;
+    border-radius: 12px;
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 100;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    min-width: 180px;
+}
+
+.plus-menu.show {
+    display: flex;
+}
+
+.plus-menu-item {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+}
+
+.plus-menu-item:hover {
+    background: #29183e;
 }
 
 .input-box input {
@@ -382,11 +447,30 @@ header {
     padding:0 16px;
     font-size:18px;
     cursor:pointer;
+    height: 38px;
     transition: transform 0.1s, background 0.2s;
 }
 
 .send-btn:active {
     transform: scale(0.92);
+}
+
+#imagePreviewBox {
+    display: none;
+    padding: 6px 12px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+    gap: 10px;
+}
+
+#imagePreview {
+    width: 35px;
+    height: 35px;
+    border-radius: 5px;
+    object-fit: cover;
 }
 
 .disclaimer {
@@ -396,7 +480,6 @@ header {
     margin-top:9px;
 }
 
-/* MODALS WITH FADE ANIMATION */
 .overlay {
     position:fixed;
     inset:0;
@@ -513,7 +596,6 @@ header {
     object-fit:cover;
 }
 
-/* MOBILE */
 @media(max-width:600px) {
     .sidebar {
         position:fixed;
@@ -539,7 +621,6 @@ header {
 
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
     <div class="brand">✦ LIM3RD AI</div>
     <button class="new-chat" onclick="newChat()">＋ New Chat</button>
@@ -555,7 +636,6 @@ header {
     </div>
 </aside>
 
-<!-- MAIN -->
 <div class="main">
 <header>
     <div class="header-left">
@@ -577,7 +657,24 @@ header {
 </main>
 
 <footer class="input-section">
+    <div id="imagePreviewBox">
+        <img id="imagePreview">
+        <span style="font-size:12px; color:var(--muted); flex:1; overflow:hidden; text-overflow:ellipsis;" id="imageName">Na-attach na larawan</span>
+        <button type="button" onclick="clearSelectedImage()" style="background:none; border:none; color:#fca5a5; cursor:pointer; font-size:16px;">✕</button>
+    </div>
+
     <div class="input-box">
+        <div class="input-actions-wrapper">
+            <button type="button" class="plus-btn" onclick="togglePlusMenu(event)">＋</button>
+            <div class="plus-menu" id="plusMenu">
+                <button type="button" class="plus-menu-item" onclick="document.getElementById('imageInput').click(); closePlusMenu();">
+                    📷 Mag-upload ng Larawan
+                </button>
+            </div>
+        </div>
+
+        <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+        
         <input id="message" type="text" placeholder="Message LIM3RD AI..." autocomplete="off">
         <button class="send-btn" id="sendBtn" onclick="handleSend()">➤</button>
     </div>
@@ -585,7 +682,6 @@ header {
 </footer>
 </div>
 
-<!-- SETTINGS MODAL -->
 <div class="overlay" id="settingsOverlay">
 <div class="modal">
     <h2>⚙ LIM3RD AI Settings</h2>
@@ -623,7 +719,6 @@ header {
 </div>
 </div>
 
-<!-- CUSTOM CONFIRMATION MODAL -->
 <div class="overlay" id="customConfirmOverlay">
 <div class="modal" style="max-width:320px; text-align:center;">
     <h2>Confirm Action</h2>
@@ -650,6 +745,7 @@ try {
 
 let avatarData = localStorage.getItem("lim3rd_avatar") || "";
 let confirmCallback = null;
+let selectedBase64Image = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     if (settings.aiName) {
@@ -669,7 +765,42 @@ document.addEventListener("DOMContentLoaded", () => {
             handleSend();
         }
     });
+
+    window.addEventListener("click", () => {
+        closePlusMenu();
+    });
 });
+
+function togglePlusMenu(event) {
+    event.stopPropagation();
+    const menu = document.getElementById("plusMenu");
+    menu.classList.toggle("show");
+}
+
+function closePlusMenu() {
+    const menu = document.getElementById("plusMenu");
+    if (menu) menu.classList.remove("show");
+}
+
+function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        selectedBase64Image = e.target.result;
+        document.getElementById("imagePreview").src = selectedBase64Image;
+        document.getElementById("imageName").textContent = file.name;
+        document.getElementById("imagePreviewBox").style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearSelectedImage() {
+    selectedBase64Image = null;
+    document.getElementById("imageInput").value = "";
+    document.getElementById("imagePreviewBox").style.display = "none";
+}
 
 function saveChats() {
     try {
@@ -877,7 +1008,12 @@ function displayMessage(text, role, scroll=true) {
 
     const content = document.createElement("div");
     content.className = "message-content";
-    content.textContent = text;
+    
+    let formattedText = text
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/!\[(.*?)\]\((.*?)\)/g, '<br><img src="$2" style="max-width:100%; border-radius:8px; margin-top:8px;" alt="$1">');
+    
+    content.innerHTML = formattedText;
 
     row.appendChild(avatar);
     row.appendChild(content);
@@ -929,24 +1065,25 @@ function typeMessageEffect(fullText, role) {
     typeChar();
 }
 
-/* SERVER PROXY API CALL (NAKAPUNTA NA SA RENDER BACKEND) */
 async function handleSend() {
     const inputField = document.getElementById("message");
     const text = inputField.value.trim();
-    if (!text) return;
+    if (!text && !selectedBase64Image) return;
 
     inputField.value = "";
+    const currentImg = selectedBase64Image;
+    clearSelectedImage();
 
     if (!currentChat) {
         currentChat = {
             id: Date.now(),
-            title: text.length > 25 ? text.substring(0, 25) + "..." : text,
+            title: text.length > 25 ? text.substring(0, 25) + "..." : (currentImg ? "Larawan" : "Bagong Usapan"),
             messages: []
         };
         chats.unshift(currentChat);
     }
 
-    currentChat.messages.push({ role: "user", text: text });
+    currentChat.messages.push({ role: "user", text: text + (currentImg ? " [Na-attach na Larawan]" : "") });
     saveChats();
     renderHistory();
     renderChat();
@@ -982,13 +1119,15 @@ async function handleSend() {
             });
         });
 
-        // 🔗 NAKAKONEKTA NA SA IYONG RENDER URL
         const RENDER_BACKEND_URL = 'https://lim3rd-ai-1.onrender.com/api/chat';
 
         const response = await fetch(RENDER_BACKEND_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: messagesPayload })
+            body: JSON.stringify({ 
+                messages: messagesPayload,
+                image: currentImg 
+            })
         });
 
         const data = await response.json();
